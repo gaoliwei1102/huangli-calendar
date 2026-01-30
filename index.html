@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>老黄历日历</title>
+  <script src="js/lunar.js"></script>
+  <style>
+    :root {
+      --primary: #c41e3a;
+      --gold: #d4af37;
+      --bg: #faf8f5;
+      --card: #fff;
+      --text: #333;
+      --border: #e0dcd5;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      text-align: center;
+      padding: 30px 0;
+      border-bottom: 2px solid var(--gold);
+      margin-bottom: 30px;
+    }
+    
+    header h1 {
+      color: var(--primary);
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    
+    .huangli-info {
+      background: linear-gradient(135deg, #fff9e6 0%, #fff 100%);
+      border: 1px solid var(--gold);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .huangli-info h2 {
+      color: var(--primary);
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+    }
+    
+    .huangli-detail {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    
+    .item {
+      padding: 10px;
+      background: var(--card);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    
+    .item-label {
+      font-size: 0.85rem;
+      color: #888;
+      margin-bottom: 5px;
+    }
+    
+    .item-value {
+      font-size: 1rem;
+      color: var(--text);
+    }
+    
+    .yi { color: #2e7d32; font-weight: bold; }
+    .ji { color: #c62828; font-weight: bold; }
+    
+    .calendar {
+      background: var(--card);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      background: var(--primary);
+      color: white;
+    }
+    
+    .calendar-header h2 {
+      font-size: 1.3rem;
+    }
+    
+    .calendar-header button {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    
+    .calendar-header button:hover {
+      background: rgba(255,255,255,0.3);
+    }
+    
+    .weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      background: #f5f5f5;
+      padding: 10px 0;
+      text-align: center;
+      font-weight: bold;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .weekdays div { color: #666; }
+    
+    .days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+    
+    .day {
+      aspect-ratio: 1;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-top: none;
+      border-left: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .day:hover { background: #fff9e6; }
+    
+    .day.other-month { color: #ccc; }
+    
+    .day.today {
+      background: #fff3e0;
+      font-weight: bold;
+    }
+    
+    .day.has-huangli {
+      background: linear-gradient(135deg, #fff9e6 0%, #fff 100%);
+    }
+    
+    .day-number {
+      font-size: 1.1rem;
+      margin-bottom: 5px;
+    }
+    
+    .day-lunar {
+      font-size: 0.75rem;
+      color: #888;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .day-yiji {
+      font-size: 0.7rem;
+      margin-top: 3px;
+    }
+    
+    .day-yiji .yi { color: #2e7d32; }
+    .day-yiji .ji { color: #c62828; }
+    
+    .event-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .event-modal.show { display: flex; }
+    
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      max-width: 400px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    
+    .modal-content h3 {
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+    
+    .event-list {
+      margin-bottom: 20px;
+    }
+    
+    .event-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+    
+    .event-item button {
+      background: #ffcdd2;
+      border: none;
+      color: #c62828;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .event-input {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .event-input input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+    
+    .event-input button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    
+    .close-modal {
+      float: right;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #888;
+    }
+    
+    @media (max-width: 600px) {
+      .container { padding: 10px; }
+      header h1 { font-size: 1.5rem; }
+      .day { padding: 5px; }
+      .day-number { font-size: 0.9rem; }
+      .day-lunar { font-size: 0.65rem; }
+      .day-yiji { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📅 老黄历日历</h1>
+      <p>择吉避凶，顺势而为</p>
+    </header>
+    
+    <div class="huangli-info" id="todayInfo">
+      <!-- 今日黄历信息 -->
+    </div>
+    
+    <div class="calendar">
+      <div class="calendar-header">
+        <button id="prevMonth">◀</button>
+        <h2 id="currentMonth">2026年1月</h2>
+        <button id="nextMonth">▶</button>
+      </div>
+      <div class="weekdays">
+        <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+      </div>
+      <div class="days" id="daysGrid">
+        <!-- 日期网格 -->
+      </div>
+    </div>
+  </div>
+  
+  <div class="event-modal" id="eventModal">
+    <div class="modal-content">
+      <button class="close-modal" onclick="closeModal()">×</button>
+      <h3 id="modalDate">2026年1月31日</h3>
+      <div class="event-list" id="eventList"></div>
+      <div class="event-input">
+        <input type="text" id="eventInput" placeholder="添加事件...">
+        <button onclick="addEvent()">添加</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    let currentDate = new Date();
+    let selectedDate = null;
+    const events = JSON.parse(localStorage.getItem('huangli-events') || '{}');
+    
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      renderTodayInfo();
+      renderCalendar();
+      document.getElementById('prevMonth').onclick = () => changeMonth(-1);
+      document.getElementById('nextMonth').onclick = () => changeMonth(1);
+      document.getElementById('eventInput').onkeypress = (e) => {
+        if (e.key === 'Enter') addEvent();
+      };
+    });
+    
+    function renderTodayInfo() {
+      const today = new Date();
+      const solar = Solar.fromYmd(today.getFullYear(), today.getMonth() + 1, today.getDate());
+      const lunar = solar.getLunar();
+      
+      document.getElementById('todayInfo').innerHTML = `
+        <h2>📌 今日黄历 - ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}</h2>
+        <div class="huangli-detail">
+          <div class="item">
+            <div class="item-label">公历</div>
+            <div class="item-value">${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日 ${['日','一','二','三','四','五','六'][today.getDay()]}曜日</div>
+          </div>
+          <div class="item">
+            <div class="item-label">农历</div>
+            <div class="item-value">${lunar.getYearInChinese()}年 ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}</div>
+          </div>
+          <div class="item">
+            <div class="item-label">宜</div>
+            <div class="item-value yi">${lunar.getDayYi().slice(0, 5).join(' ')}${lunar.getDayYi().length > 5 ? '...' : ''}</div>
+          </div>
+          <div class="item">
+            <div class="item-label">忌</div>
+            <div class="item-value ji">${lunar.getDayJi().slice(0, 5).join(' ')}${lunar.getDayJi().length > 5 ? '...' : ''}</div>
+          </div>
+          <div class="item">
+            <div class="item-label">冲煞</div>
+            <div class="item-value">${lunar.getChao()}</div>
+          </div>
+          <div class="item">
+            <div class="item-label">吉神</div>
+            <div class="item-value">${lunar.getDayJiShen().slice(0, 3).join(' ') || '无'}</div>
+          </div>
+        </div>
+      `;
+    }
+    
+    function renderCalendar() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      
+      document.getElementById('currentMonth').textContent = `${year}年${month + 1}月`;
+      
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const startDate = new Date(firstDay);
+      startDate.setDate(startDate.getDate() - firstDay.getDay());
+      
+      const today = new Date();
+      let html = '';
+      
+      for (let i = 0; i < 42; i++) {
+        const date = new Date(startDate);
+        date.setDate(date.getDate() + i);
+        
+        const isOtherMonth = date.getMonth() !== month;
+        const isToday = date.getFullYear() === today.getFullYear() && 
+                       date.getMonth() === today.getMonth() && 
+                       date.getDate() === today.getDate();
+        
+        const solar = Solar.fromYmd(date.getFullYear(), date.getMonth() + 1, date.getDate());
+        const lunar = solar.getLunar();
+        const yi = lunar.getDayYi();
+        const ji = lunar.getDayJi();
+        
+        const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        const hasEvents = events[dateKey] && events[dateKey].length > 0;
+        
+        html += `
+          <div class="day ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'today' : ''} ${hasEvents ? 'has-huangli' : ''}" 
+               onclick="openModal('${dateKey}', '${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日')">
+            <div class="day-number">${date.getDate()}</div>
+            <div class="day-lunar">${lunar.getDayInChinese()}</div>
+            <div class="day-yiji">
+              ${yi.length ? `<span class="yi">宜${yi[0]}</span>` : ''}
+              ${ji.length ? `<span class="ji">忌${ji[0]}</span>` : ''}
+            </div>
+          </div>
+        `;
+      }
+      
+      document.getElementById('daysGrid').innerHTML = html;
+    }
+    
+    function changeMonth(delta) {
+      currentDate.setMonth(currentDate.getMonth() + delta);
+      renderCalendar();
+    }
+    
+    function openModal(dateKey, dateStr) {
+      selectedDate = dateKey;
+      document.getElementById('modalDate').textContent = dateStr;
+      renderEvents();
+      document.getElementById('eventModal').classList.add('show');
+    }
+    
+    function closeModal() {
+      document.getElementById('eventModal').classList.remove('show');
+    }
+    
+    function renderEvents() {
+      const list = document.getElementById('eventList');
+      const dateEvents = events[selectedDate] || [];
+      
+      if (dateEvents.length === 0) {
+        list.innerHTML = '<p style="color:#888;text-align:center;padding:20px;">暂无事件</p>';
+        return;
+      }
+      
+      list.innerHTML = dateEvents.map((e, i) => `
+        <div class="event-item">
+          <span>${e}</span>
+          <button onclick="deleteEvent(${i})">删除</button>
+        </div>
+      `).join('');
+    }
+    
+    function addEvent() {
+      const input = document.getElementById('eventInput');
+      const text = input.value.trim();
+      if (!text) return;
+      
+      if (!events[selectedDate]) events[selectedDate] = [];
+      events[selectedDate].push(text);
+      localStorage.setItem('huangli-events', JSON.stringify(events));
+      
+      input.value = '';
+      renderEvents();
+      renderCalendar();
+    }
+    
+    function deleteEvent(index) {
+      events[selectedDate].splice(index, 1);
+      if (events[selectedDate].length === 0) delete events[selectedDate];
+      localStorage.setItem('huangli-events', JSON.stringify(events));
+      renderEvents();
+      renderCalendar();
+    }
+    
+    // 点击背景关闭弹窗
+    document.getElementById('eventModal').onclick = (e) => {
+      if (e.target.id === 'eventModal') closeModal();
+    };
+  </script>
+</body>
+</html>
