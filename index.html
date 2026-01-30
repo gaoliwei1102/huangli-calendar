@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>老黄历 - 择吉避凶</title>
-  <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
+  <script src="js/lunar.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     
@@ -485,7 +485,7 @@
         </div>
         <div class="today-lunar">
           <span>🧧 ${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}</span>
-          <span>📅 ${lunar.getSolar().getConstellation()}</span>
+          <span>📅 ${lunar.getSolar().getXingzuo()}</span>
         </div>
         <div class="today-info">
           <div class="info-row">
@@ -500,7 +500,7 @@
           </div>
           <div class="info-box">
             <div class="info-label">冲煞 · 吉神</div>
-            <div class="info-value">${lunar.getChao()} | ${lunar.getDayJiShen().slice(0, 2).join(' ') || '无'}</div>
+            <div class="info-value">${lunar.getChong()}${lunar.getSha()} | ${lunar.getDayJiShen().slice(0, 2).join(' ') || '无'}</div>
           </div>
         </div>
       `;
