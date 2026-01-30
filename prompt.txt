@@ -1,0 +1,30 @@
+Create a beautiful Chinese Huangli (老黄历) calendar web app with these requirements:
+
+**Files to create:**
+1. index.html - Complete HTML with embedded CSS and JS
+2. server.js - Node.js HTTP server on port 8001
+3. README.md - Project documentation
+
+**Features:**
+- Calendar month view with navigation
+- Daily Huangli: 宜 (suitable activities), 忌 (avoid activities), 节气, 冲煞
+- Click any date to add/view events
+- Events stored in LocalStorage
+- Traditional Chinese style with red/gold colors
+
+**Design:**
+- Mobile-first responsive design
+- Traditional Chinese aesthetic
+- Primary color: #c41e3a (red)
+- Accent color: #d4af37 (gold)
+- Card-based clean layout
+- Smooth animations
+- Chinese fonts
+
+**Technical:**
+- Use lunar-javascript library (CDN: https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.js)
+- Vanilla HTML/CSS/JS (no frameworks)
+- Node.js simple HTTP server
+- Port 8001
+
+Generate complete, working code. Make mobile experience excellent!
